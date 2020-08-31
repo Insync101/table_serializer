@@ -33,12 +33,9 @@ local function string_ret(o, typ)
     end
 
     old_func = rawget(mt, '__tostring')
-    setreadonly(mt, false)
-
     rawset(mt, '__tostring', nil)
     ret = tostring(o)
     rawset(mt, '__tostring', old_func)
-    setreadonly(mt, true)
     return ret
 end
 
@@ -83,4 +80,4 @@ local function serialize_table(t, p, c, s)
     return ('{' .. (e and '\n' or '')) .. str .. (e and s('  ', p - 1) or '') .. '}'
 end
 
-return serialize_table
+print(serialize_table({'A', 'B', function()end}))
