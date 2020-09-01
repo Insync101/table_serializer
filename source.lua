@@ -1,4 +1,5 @@
 -- work in progress, reworking recursion causing crashes, not done yet.
+
 type = typeof or type
 local str_types = {
     ['boolean'] = true,
@@ -64,7 +65,7 @@ local function serialize_table(t, p, c, s)
     s = s or string.rep
 
     local function is_recursive(v, e)
-        return (e[2] < p and e[1] == v or rawequal and rawequal(v, t)) and p ~= 1
+        return false
     end
 
     local function localized_format(v, typ)
