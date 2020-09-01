@@ -1,3 +1,4 @@
+-- work in progress, reworking recursion causing crashes, not done yet.
 type = typeof or type
 local str_types = {
     ['boolean'] = true,
