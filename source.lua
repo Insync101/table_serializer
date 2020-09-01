@@ -64,7 +64,7 @@ local function serialize_table(t, p, c, s)
     p = p or 1
     s = s or string.rep
 
-    local function is_recursive(v, e)
+    local function is_recursive(v, e) -- todo.
         return false
     end
 
