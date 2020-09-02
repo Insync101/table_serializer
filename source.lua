@@ -1,5 +1,3 @@
--- work in progress, reworking recursion causing crashes, not done yet.
-
 type = typeof or type
 local str_types = {
     ['boolean'] = true,
@@ -26,7 +24,7 @@ end
 
 local function string_ret(o, typ)
     local ret, mt, old_func
-    if not (typ == 'table' or typ == 'userdata') then
+    if not (typ == 'table' or type == 'userdata') then
         return tostring(o)
     end
     mt = (getrawmetatable or getmetatable)(o)
@@ -64,19 +62,16 @@ local function serialize_table(t, p, c, s)
     p = p or 1
     s = s or string.rep
 
-    local function is_recursive(v, e) -- todo.
-        return false
+    local function localized_format(v, is_table)
+        return is_table and not (c[v][2] < p) and serialize_table(v, p + 1, c, s) or format_value(v)
     end
 
-    local function localized_format(v, typ)
-        return (typ == 'table' and not is_recursive(v, c[v])) and serialize_table(v, p + 1, c) or format_value(v)
-    end
+    c[t] = {t, 1}
 
     for i, v in next, t do
-        local typ_i, typ_v = type(i), type(v)
-        c[i], c[v] = typ_i == 'table' and {i, p}, typ_v == 'table' and {v, p}
-
-        str = str .. s('  ', p) .. '[' .. localized_format(i, typ_i) .. ']' .. ' = ' .. localized_format(v, typ_v) .. '\n'
+        local typ_i, typ_v = type(i) == 'table', type(v) == 'table'
+        c[i], c[v] = (not c[i] and typ_i) and {i, p} or c[i], (not c[v] and typ_v) and {v, p} or c[v]
+        str = str .. s('  ', p) .. '[' .. localized_format(i, typ_i) .. '] = '  .. localized_format(v, typ_v) .. '\n'
     end
 
     return ('{' .. (e and '\n' or '')) .. str .. (e and s('  ', p - 1) or '') .. '}'
