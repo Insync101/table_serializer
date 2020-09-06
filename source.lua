@@ -63,10 +63,10 @@ local function serialize_table(t, p, c, s)
     s = s or string.rep
 
     local function localized_format(v, is_table)
-        return is_table and (c[v][2] > p) and serialize_table(v, p + 1, c, s) or format_value(v)
+        return is_table and (c[v][2] >= p) and serialize_table(v, p + 1, c, s) or format_value(v)
     end
 
-    c[t] = {t, 1}
+    c[t] = {t, 0}
 
     for i, v in next, t do
         local typ_i, typ_v = type(i) == 'table', type(v) == 'table'
