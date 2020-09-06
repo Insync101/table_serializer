@@ -24,7 +24,7 @@ end
 
 local function string_ret(o, typ)
     local ret, mt, old_func
-    if not (typ == 'table' or type == 'userdata') then
+    if not (typ == 'table' or typ == 'userdata') then
         return tostring(o)
     end
     mt = (getrawmetatable or getmetatable)(o)
