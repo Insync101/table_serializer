@@ -45,7 +45,7 @@ local function format_value(v)
     if str_types[typ] then
         return string_ret(v, typ)
     elseif typ == 'string' then
-        return '[['..v..']]'
+        return '"'..v..'"'
     elseif typ == 'Instance' then
         return v:GetFullName()
     else
