@@ -56,6 +56,7 @@ end
 local function serialize_table(t, p, c, s)
     local str = ""
     local n = count_table(t)
+    local ci = 1
     local e = n > 0
 
     c = c or {}
@@ -71,7 +72,8 @@ local function serialize_table(t, p, c, s)
     for i, v in next, t do
         local typ_i, typ_v = type(i) == 'table', type(v) == 'table'
         c[i], c[v] = (not c[i] and typ_i) and {i, p} or c[i], (not c[v] and typ_v) and {v, p} or c[v]
-        str = str .. s('  ', p) .. '[' .. localized_format(i, typ_i) .. '] = '  .. localized_format(v, typ_v) .. '\n'
+        str = str .. s('  ', p) .. '[' .. localized_format(i, typ_i) .. '] = '  .. localized_format(v, typ_v) .. (ci < n and ',' or '') .. '\n'
+        ci = ci + 1
     end
 
     return ('{' .. (e and '\n' or '')) .. str .. (e and s('  ', p - 1) or '') .. '}'
