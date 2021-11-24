@@ -9,10 +9,6 @@ local str_types = {
     ['nil'] = true
 }
 
-local rawequal = rawequal or function(a, b)
-    return a == b
-end
-
 local function count_table(t)
     local c = 0
     for i, v in next, t do
@@ -54,8 +50,8 @@ local function format_value(v)
 end
 
 local function serialize_table(t, p, c, s)
-    local str = ""
     local n = count_table(t)
+    local str = ""
     local ti = 1
     local e = n > 0
 
