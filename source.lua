@@ -47,7 +47,7 @@ local function format_value(v)
 	end
 end
 
-local function serialize_table(list, spaces)
+local function serialize_table(_, list, spaces)
 	local n = count_table(list)
 
 	local str = ''
@@ -59,7 +59,7 @@ local function serialize_table(list, spaces)
 		str = str .. format('%s[%s] = %s\n',
 			rep('  ', spaces),
 			format_value(_index),
-			not isTable and format_value(_value) or serialize_table(_value, spaces + 1)
+			not isTable and format_value(_value) or serialize_table(nil, _value, spaces + 1)
 		)
 	end
 
