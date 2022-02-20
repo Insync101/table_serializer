@@ -1,78 +1,79 @@
-type = typeof or type
-local str_types = {
-    ['boolean'] = true,
-    ['table'] = true,
-    ['userdata'] = true,
-    ['table'] = true,
-    ['function'] = true,
-    ['number'] = true,
-    ['nil'] = true
+local type = typeof or type
+local format, rep = string.format, string.rep
+
+local types = {
+	['nil'] = true,
+	['table'] = true,
+	['number'] = true,
+	['boolean'] = true,
+	['userdata'] = true,
+	['function'] = true,
 }
 
 local function count_table(t)
-    local c = 0
-    for i, v in next, t do
-        c = c + 1
-    end
-
-    return c
+	local c = 0
+	for _ in next, t do
+		c = c + 1
+	end
+	return c
 end
 
-local function string_ret(o, typ)
-    local ret, mt, old_func
-    if not (typ == 'table' or typ == 'userdata') then
-        return tostring(o)
-    end
-    mt = (getrawmetatable or getmetatable)(o)
-    if not mt then 
-        return tostring(o)
-    end
+local function string_ret(data, type)
+	local response = tostring(data)
+	if type ~= 'table' or type ~= 'userdata' then
+		return response
+	end
 
-    old_func = rawget(mt, '__tostring')
-    rawset(mt, '__tostring', nil)
-    ret = tostring(o)
-    rawset(mt, '__tostring', old_func)
-    return ret
+	local __meta = getmetatable(data)
+	if not __meta then
+		return response
+	end
+
+	return tostring(__meta)
 end
 
 local function format_value(v)
-    local typ = type(v)
+	local type = type(v)
+	local _str = string_ret(v, type)
 
-    if str_types[typ] then
-        return string_ret(v, typ)
-    elseif typ == 'string' then
-        return '"'..v..'"'
-    elseif typ == 'Instance' then
-        return v:GetFullName()
-    else
-        return typ..'.new(' .. tostring(v) .. ')'
-    end
+	if types[type] then
+		return _str
+	elseif type == 'string' then
+		return format('\'%s\'', _str)
+	elseif type == 'Instance' then
+		return v:GetFullName() -- Roblox?
+	else
+		return format('%s.new(%s)', type, _str)
+	end
 end
 
-local function serialize_table(t, p, c, s)
-    local n = count_table(t)
-    local str = ""
-    local ti = 1
-    local e = n > 0
+local function serialize_table(_, list, spaces)
+	local n = count_table(list)
 
-    c = c or {}
-    p = p or 1
-    s = s or string.rep
+	local str = ''
+	spaces = spaces or 1
 
-    local function localized_format(v, is_table)
-        return is_table and (c[v][2] >= p) and serialize_table(v, p + 1, c, s) or format_value(v)
-    end
+	for _index, _value in next, list do
+		local isTable = type(_value) == 'table'
 
-    c[t] = {t, 0}
+		str = str .. format('%s[%s] = %s\n',
+			rep('  ', spaces),
+			format_value(_index),
+			not isTable and format_value(_value) or serialize_table(nil, _value, spaces + 1)
+		)
+	end
 
-    for i, v in next, t do
-        local typ_i, typ_v = type(i) == 'table', type(v) == 'table'
-        c[i], c[v] = (not c[i] and typ_i) and {i, p} or c[i], (not c[v] and typ_v) and {v, p} or c[v]
-        str = str .. s('  ', p) .. '[' .. localized_format(i, typ_i) .. '] = '  .. localized_format(v, typ_v) .. (ti < n and ',' or '') .. '\n'
-        ti = ti + 1
-    end
-
-    return ('{' .. (e and '\n' or '')) .. str .. (e and s('  ', p - 1) or '') .. '}'
+	return format('{%s}', format('%s%s%s',
+		n~=0 and '\n' or '',
+		str,
+		n~=0 and rep('  ', spaces - 1) or ''))
 end
 
-return serialize_table
+return setmetatable({
+	types = types,
+	count_table = count_table,
+	string_ret = string_ret,
+	format_value = format_value
+}, {
+	__call = serialize_table
+})
